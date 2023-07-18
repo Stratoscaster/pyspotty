@@ -6,13 +6,6 @@ from urllib.parse import urlencode
 SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize?'
 REDIRECT_URL = 'http://localhost:8069/callback'
 
-def get_header(b64_auth_code):
-    headers = {
-        'Authorization': f'Basic {b64_auth_code}'
-    }
-    return headers
-
-
 class RequestUserAuth:
     def __init__(self, client_id: str, client_secret: str):
         self.client_id = client_id.replace('\n','').replace(' ','')
