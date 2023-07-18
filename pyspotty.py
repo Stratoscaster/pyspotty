@@ -1,4 +1,6 @@
-from tools.spotify_requests import GetAuthToken
+from tools.spotify_requests import RequestUserAuth
+
+
 class Pyspotty:
 
     def __init__(self):
@@ -9,7 +11,7 @@ class Pyspotty:
             print('Credentials.txt file must have two lines with mappings:\nid:<your client_id here>\nsecret:<your client_secret here>')
             quit()
 
-        token_request = GetAuthToken(self.client_id, self.client_secret)
+        token_request = RequestUserAuth(self.client_id, self.client_secret)
         token_request.call()
         token_request.print_response()
         self.access_token = token_request.response
