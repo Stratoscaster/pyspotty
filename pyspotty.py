@@ -1,4 +1,4 @@
-from tools.spotify_requests import RequestUserAuth
+from api.auth import RequestUserAuth
 
 
 class Pyspotty:

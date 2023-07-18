@@ -1,10 +1,15 @@
 from requests import post, get, Response
 from tools.security import Security
 from tools.browser_interaction import open_url_in_browser
-from urllib.parse import urlencode
+from urllib import parse
+from tools.browser_callback import CallbackListener
+from time import sleep
+from threading import Thread
 
 SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize?'
-REDIRECT_URL = 'http://localhost:8069/callback'
+CALLBACK_PORT = 8069
+REDIRECT_URL = f'http://localhost:{CALLBACK_PORT}/callback'
+AUTH_TIMEOUT = 10 * 60
 
 class RequestUserAuth:
     def __init__(self, client_id: str, client_secret: str):
@@ -37,7 +42,25 @@ class RequestUserAuth:
         # print('Spotify User-Auth-Request Response: ' + self.response.text)
         # print(open_url_in_browser(SPOTIFY_AUTH_URL + urlencode(self.params)))
         print('Client ID: [' + self.client_id + ']')
+        callback_listener = CallbackListener()
+        listener_thread = Thread(target=callback_listener.start)
+        listener_thread.start()
+        print('Please approve the OAuth Request in your web browser. :)')
         open_url_in_browser(f'https://accounts.spotify.com/authorize?client_id={self.client_id}&response_type=code&redirect_uri={REDIRECT_URL}')
+        time_elapsed = 0
+        while not callback_listener.callback_received:
+            wait_time = 0.1
+            time_elapsed += wait_time
+            if wait_time >= AUTH_TIMEOUT:
+                print('TIMED OUT WAITING FOR AUTH')
+                callback_listener.stop_server()
+            sleep(wait_time)
+
+        callback_path = callback_listener.path
+        path_dict = parse.urlsplit(callback_path.query)
+        print('callback_path: ' + callback_path)
+        print('callback_dict: ' + path_dict)
+
 
     def print_response(self):
         pass
