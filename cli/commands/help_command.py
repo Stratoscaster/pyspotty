@@ -9,7 +9,12 @@ class HelpCommand(BaseCommand):
             'This is a page to display when "help" is used on this command'
             'This is a second line to display'
         ]
-        # Add list of subcommands that can be called, add subcommands to BaseCommand parent
-        command_name = 'help'
+        # TODO: Add list of subcommands that can be called, add subcommands to BaseCommand parent
+        command_name = 'help'   # keyword for command
         command_summary = 'A description of all main commands.'
         super().__init__(command_name, command_summary, help_text, user_input)
+
+    def execute_command(self):
+        # my logic here and calling api package
+        pass
+
