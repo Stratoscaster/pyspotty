@@ -1,5 +1,4 @@
-from urllib import parse
+from cli.command_compiler import CommandCompiler
 
-url = '/client-id=123123123&code=00000000'
-print(parse.urlsplit(url).query)
 
+compiler = CommandCompiler('Test')
