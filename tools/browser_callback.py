@@ -1,36 +1,58 @@
 import socketserver
 from http.server import SimpleHTTPRequestHandler
-
+from collections.abc import Callable
+from functools import partial
+from threading import Thread
+from io import StringIO
 
 class CallbackListener(SimpleHTTPRequestHandler):
 
-    def __init__(self, callback_address=None):
-        super().__init__(self)
-        if callback_address is not None and len(callback_address) != 2:
-            print(f'Callback host address given invalid: {callback_address}. '
-                  f'\nMust be tuple (address, port) - either may be null.'
-                  f'\nFalling back to default (localhost:8069).')
-        self.HOST = 'localhost' if callback_address is None else callback_address[0]
-        self.PORT = 8069 if callback_address is None else callback_address[1]
-        self.address = (self.HOST, self.PORT)
+    def __init__(self, path_callback: callable, *args, **kwargs):
+        self.path_callback = path_callback
         self.callback_received = False
+        super().__init__(*args, **kwargs)
 
     # MAY NEED TO SEPARATE HANDLER FROM THE CALLBACK LISTENER
-    def start(self):
-        with socketserver.TCPServer(self.address, CallbackListener) as httpd:
-            print('Listening for callback...')
+
+    @staticmethod
+    def start_server(path_callback: Callable[object, str], host: str, port: int):
+        # Use partial to partially init CallbackListener with our callback function(str) and port
+        CallbackHandler = partial(CallbackListener, path_callback)
+
+        server_thread = Thread(target=CallbackListener.start_server_instance, args=(CallbackHandler, host, port))
+        server_thread.start()
+
+    @staticmethod
+    def start_server_instance(tcp_server, host: str, port: int):
+        with socketserver.TCPServer((host, port), tcp_server) as httpd:
             httpd.serve_forever()
 
     def do_GET(self):
-        print('Callback POST Received. Path: ' + self.path)
         self.callback_received = True
-        self.headers.items()
-        self.send_response(200)
-        return SimpleHTTPRequestHandler.do_GET(self)
 
-    def get_path(self):
-        return self.path
+        page_content = self.send_head()
+        if page_content:
+            self.wfile.write(page_content)
+        else:
+            print('CallbackListener (non-fatal error): invalid content in self.send_head(). '
+                  '\n Please close your browser tab after clicking "login". Login was successful.')
+
+        # Pass itself and the path back to the main program to shut the server down
+        # once the path is verified
+        self.path_callback(self, self.path)
+
+    def log_message(self):
+        # Mute the built-in logger
+        pass
 
     def stop_server(self):
+        print('Stopping Server...')
         self.server.shutdown()
 
+    def send_head(self):
+        body = '<html><b>Authentication complete. Please return to pyspotty to continue.</b></html>'.encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        return body

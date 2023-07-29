@@ -8,6 +8,7 @@ credentials_filename = 'credentials.txt'
 class Pyspotty:
 
     def __init__(self, force_reauth=False):
+        print('Welcome to pyspotty!')
         credentials = Pyspotty.get_credentials()
         if credentials is None or credentials['id'] is None:
             print('Credentials.txt file must have one line for '
