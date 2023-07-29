@@ -15,7 +15,7 @@ class CallbackListener(SimpleHTTPRequestHandler):
     # MAY NEED TO SEPARATE HANDLER FROM THE CALLBACK LISTENER
 
     @staticmethod
-    def start_server(path_callback: Callable[object, str], host: str, port: int):
+    def start_server(path_callback: Callable, host: str, port: int):
         # Use partial to partially init CallbackListener with our callback function(str) and port
         CallbackHandler = partial(CallbackListener, path_callback)
 
@@ -41,7 +41,7 @@ class CallbackListener(SimpleHTTPRequestHandler):
         # once the path is verified
         self.path_callback(self, self.path)
 
-    def log_message(self):
+    def log_message(self, *args):
         # Mute the built-in logger
         pass
 

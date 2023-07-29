@@ -1,5 +1,7 @@
 from api.auth import RequestUserAuth
 from os import path
+from time import sleep
+
 
 auth_token_filename = 'authtoken.txt'
 credentials_filename = 'credentials.txt'
@@ -8,7 +10,7 @@ credentials_filename = 'credentials.txt'
 class Pyspotty:
 
     def __init__(self, force_reauth=False):
-        print('Welcome to pyspotty!')
+        print('Starting Pyspotty...')
         credentials = Pyspotty.get_credentials()
         if credentials is None or credentials['id'] is None:
             print('Credentials.txt file must have one line for '
@@ -24,7 +26,9 @@ class Pyspotty:
         if force_reauth or self.auth_token is None:
             token_request = RequestUserAuth(self.client_id)
             token_request.call()
-            self.auth_token = token_request.response
+            while token_request.auth_token is None:
+                sleep(0.5)
+            self.auth_token = token_request.auth_token
             self.save_auth_token(self.auth_token)
 
     def is_auth_success(self):
@@ -49,6 +53,8 @@ class Pyspotty:
 
     @staticmethod
     def save_auth_token(auth_token):
+        if auth_token is None or auth_token == '':
+            return
         with open(auth_token_filename, 'w') as f:
             f.write(auth_token)
 

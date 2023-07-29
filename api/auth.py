@@ -47,6 +47,7 @@ class RequestUserAuth:
 
     def process_path_for_auth_code(self, path: str):
         split_query = parse.urlsplit(path).query.split('=')
+        print(split_query[1])
         if len(split_query) > 1:
             self.auth_token = split_query[1]
         else:
