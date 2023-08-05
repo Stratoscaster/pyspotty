@@ -9,7 +9,7 @@ class NextSubcommand(BaseCommand):
     def __init__(self, user_input):
         super(NextSubcommand, self).__init__(user_input)
 
-    def execute_command(self) -> list[str]:
+    def execute_command(self) -> tuple[bool, str]:
         return True, 'Playing next.'
 
 
