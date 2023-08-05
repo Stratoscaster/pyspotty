@@ -2,7 +2,7 @@ from pyspotty import Pyspotty
 from cli.spotify_cli import SpotifyCLI
 
 def run():
-    pysp = Pyspotty()
+    pysp = Pyspotty(debug_mode=True)    # Enable with debug mode if desired
     cli = SpotifyCLI(pysp)
     cli.start()
 

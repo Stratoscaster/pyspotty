@@ -2,7 +2,7 @@ from __future__ import annotations  # Delay evaluation of typehints
 from abc import ABC, abstractmethod
 from json import dumps
 from typing import Type
-
+from pyspotty import Pyspotty
 
 class BaseCommand(ABC):
     help_text = ['Command help_text not overridden.']
@@ -11,18 +11,21 @@ class BaseCommand(ABC):
     subcommands = []
     INVALID_SUBCOMMAND = False, 'Invalid subcommand'
 
-    def __init__(self, user_input: str):
+    def __init__(self, pyspotty: Pyspotty, user_input: str):
         if not isinstance(self.class_type().command_name, str) \
                 or not isinstance(self.class_type().command_summary, str) \
                 or not isinstance(self.class_type().help_text, list):
             self._command_configuration_warning()
 
+        self.pyspotty = pyspotty
         self.user_input = user_input
         self._result = self._parse_command_string(user_input)
 
     def get_result(self):
         return self._result
 
+    # Do not call this yourself, allow the constructor to do so
+    # Due to the method below, all BaseCommand implementations of execute_command() must accept user_input
     def _parse_command_string(self, user_input: str) -> tuple[bool, str]:
         # Here we have four branches that can occur
         # Case 1: This command has no more subcommands to parse down into
@@ -50,7 +53,8 @@ class BaseCommand(ABC):
             return subcommand(remainder).get_result()  # Case 4
 
     @abstractmethod
-    def execute_command(self, *args) -> tuple[bool, str]:
+    # Do not call this yourself, allow the constructor to call it (needs to be fixed to be private)
+    def execute_command(self, user_input: str) -> tuple[bool, str]:
         # Must return list of strings to display to output (or a template string inside of list)
         pass
 

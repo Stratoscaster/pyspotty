@@ -9,14 +9,14 @@ credentials_filename = 'credentials.txt'
 
 class Pyspotty:
 
-    def __init__(self, force_reauth=False):
+    def __init__(self, force_reauth=False, debug_mode=False):
         print('Starting Pyspotty...')
         credentials = Pyspotty.get_credentials()
         if credentials is None or credentials['id'] is None:
             print('Credentials.txt file must have one line for '
                   'client_id:\nid:<your client_id here>')
             quit()
-
+        self.debug_mode = debug_mode
         self.client_id = credentials['id']
 
         # Attempt to load pre-existing auth token
@@ -30,6 +30,13 @@ class Pyspotty:
                 sleep(0.5)
             self.auth_token = token_request.auth_token
             self.save_auth_token(self.auth_token)
+
+    def get_auth_token(self):
+        return self.auth_token
+
+    def get_auth_headers(self):
+        print(self.get_auth_token())
+        return {'Authorization': f'Bearer {self.get_auth_token()}'}
 
     def is_auth_success(self):
         return self.auth_token is not None

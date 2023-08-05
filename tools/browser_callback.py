@@ -12,11 +12,11 @@ class CallbackListener(SimpleHTTPRequestHandler):
         self.callback_received = False
         super().__init__(*args, **kwargs)
 
-    # MAY NEED TO SEPARATE HANDLER FROM THE CALLBACK LISTENER
 
     @staticmethod
     def start_server(path_callback: Callable, host: str, port: int):
         # Use partial to partially init CallbackListener with our callback function(str) and port
+        # Huge shoutout to that one guy who suggested it on Stack Overflow [https://stackoverflow.com/a/58217918/16472278] jfc
         CallbackHandler = partial(CallbackListener, path_callback)
 
         server_thread = Thread(target=CallbackListener.start_server_instance, args=(CallbackHandler, host, port))
@@ -48,6 +48,7 @@ class CallbackListener(SimpleHTTPRequestHandler):
     def stop_server(self):
         print('Stopping Server...')
         self.server.shutdown()
+        self.server.server_close()
 
     def send_head(self):
         body = '<html><b>Authentication complete. Please return to pyspotty to continue.</b></html>'.encode('utf-8')
